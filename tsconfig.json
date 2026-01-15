@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+
+    "module": "esnext",
+    "target": "esnext",
+    "types": [],
+		"allowJs": true,
+		"checkJs": true,
+
+    "sourceMap": false,
+    "declaration": false,
+    "declarationMap": false,
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  },
+	"include": [
+		"src/main/**/*.mjs",
+		"src/shared/**/*.mjs",
+		"src/declarations.d.ts",
+		"src/globals.d.ts"
+	],
+	"exclude": [
+		"src/cache.mjs",
+		"src/worker/**/*"
+	]
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Complexome</title>
+    <link rel="stylesheet" href="/vib.min.css">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="vib-body">
+    <header class="vib-header">
+      <div class="vib-bar-breadcrumb">
+        <div class="vib-breadcrumbs">
+          <a class="breadcrumb" href="https://vib.be" target="_blank" rel="noopener noreferrer">
+            <img class="vib-logo-small" src="https://vibbits.github.io/vib-css/images/vib.svg" alt="VIB Logo">
+            <span class="vib-breadcrumb-arrow"></span>
+          </a>
+          <a class="breadcrumb" href="https://vib.be/en/technologies/technology-portfolio" target="_blank" rel="noopener noreferrer">
+            <span class="vib-link-title">VIB Technologies</span>
+            <span class="vib-breadcrumb-arrow"></span>
+          </a>
+          <a class="breadcrumb" href="https://metabolomicscore-leuven.sites.vib.be/en" target="_blank" rel="noopener noreferrer">
+            <span class="vib-link-title">Metabolomics Core - Leuven</span>
+            <span class="vib-breadcrumb-arrow"></span>
+          </a>
+          <a class="breadcrumb" href="/">
+            <span class="vib-link-title">Complexome</span>
+            <span class="vib-breadcrumb-arrow"></span>
+          </a>
+        </div>
+      </div>
+      <nav class="vib-nav">
+        <h1 class="vib-app-logo">Complexome Profiler</h1>
+      </nav>
+    </header>
+    <main class="vib-main">
+      <h2>Detecting altered protein complexes across biological conditions using proteomics data</h2>
+      <h3>Brief Outline</h3>
+      <p>
+        The core principle of this analysis is that a more comprehensive understanding of functional perturbations can be achieved by contextualizing affected (i.e., differentially expressed) proteins within their complexes and functional assemblies in the cellular environment. This integrative approach (<em>middle</em>) enables a more precise identification of disrupted pathways and biological functions compared to a simplistic, &quot;binary&quot; perspective asking whether individual proteins are differentially expressed or not (<em>left</em>). This approach provides a host of tangible, actionable and comprehensive insights into biological mechanisms (<em>right</em>).
+      </p>
+      <p>
+        A preprint showing the application of this pipeline to metabolic disease is currently available on <a href="https://www.google.com/url?q=https%3A%2F%2Fwww.biorxiv.org%2Fcontent%2F10.1101%2F2023.12.30.573613v1">bioRxiv</a>.
+      </p>
+      <figure>
+        <img src="/images/overview.jpg" alt="Complex Profiler context overview" width="1000" height="400">
+      </figure>
+
+      <form class="app-parameters">
+        <div id="upload-area" class="upload-area">
+          <div class="upload-text">
+            <strong>Choose a proteomics file</strong> or drag it here
+          </div>
+          <button class="upload-button">Select file</button>
+          <input type="file" name="proteomics-file" id="proteomics-file">
+        </div>
+
+        <div>
+          <label class="app-parameters-label" for="species">Species</label>
+          <select name="species" id="species">
+            <option value="9606">Homo sapiens</option>
+            <option value="10090">Mus musculus</option>
+            <option value="559292">Saccharomyces cerevisiae</option>
+            <option value="83333">Escherichia coli strain K12</option>
+            <option value="7227">Drosothila melanogaster</option>
+            <option value="3702">Arabidopsis thailiana</option>,
+            <option value="6239">Caenorhabditis elegans</option>,
+            <option value="10116">Rattus norvegicus</option>,
+            <option value="284812">Schizosaccharomyces pombe</option>,
+            <option value="9031">Gallus gallus</option>,
+            <option value="9913">Bos taurus</option>,
+            <option value="2697049">Severe acute respitory syndrome coronavirus 2</option>,
+            <option value="8732">Crotalus durissus terrificus</option>,
+            <option value="694009">Severe acute respiratory syndrome coronavirus</option>,
+            <option value="1263720">Middle East respiratory syndrome-related coronavirus</option>,
+            <option value="7955">Danio rerio</option>,
+            <option value="9615">Canis lupus familiaris</option>,
+            <option value="1235996">Human betacoronavirus 2c EMC/2012</option>,
+            <option value="8355">Xenopus laevis</option>,
+            <option value="9986">Oryctolagus cuniculus</option>,
+            <option value="9823">Sus scrofa</option>,
+            <option value="562">Escherichia coli</option>,
+            <option value="6523">Lymnaea stagnalis</option>,
+            <option value="9940">Ovis aries</option>,
+            <option value="208964">Pseudomonas aeruginosa strain ATCC 15692</option>,
+            <option value="7787">Tetronarce californica</option>,
+            <option value="7788">Torpedo marmorata</option>,
+            <option value="243277">Vibrio cholerae serotype O1 strain ATCC 39315 / El Tor Inaba N16961</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="app-parameters-label" for="log2fc-threshold">log<sub>2</sub>(fold change)</label>
+          <input type="number" value="1" min="0.0" step="0.1" name="log2fc-threshold" id="log2fc-threshold" disabled>
+        </div>
+
+        <div>
+          <label class="app-parameters-label" for="adjp-threshold">Adjusted P-value threshold</label>
+          <input type="number" value="0.05" min="0.0" step="0.01" name="adjp-threshold" id="adjp-threshold" disabled>
+        </div>
+
+        <div>
+          <label class="app-parameters-label" for="top-n-go-terms">Maximum number of Gene Ontology terms</label>
+          <input type="number" value="10" name="top-n-go-terms" id="top-n-go-terms" disabled>
+        </div>
+      </form>
+      <div id="results">
+        <div class="tooltip"></div>
+        <figure class="output-figure" id="subunit-dist"></figure>
+        <figure class="output-figure" id="shared-subunits"></figure>
+        <figure class="output-figure" id="proteomics-coverage"></figure>
+        <figure class="output-figure" id="venn"></figure>
+        <figure class="output-figure" id="volcano"></figure>
+        <figure class="output-figure" id="goterms"></figure>
+        <div id="perturbed-complexes-table" class="data-table-container"></div>
+        <figure class="output-figure">
+          <h4 id="complex-name"></h4>
+          <a id="complexome-link" href="#" target="_blank">Complex Portal</a>
+          <iframe id="my-complexome-viewer" src="/cv.html" sandbox="allow-scripts" width="815" height="935"></iframe>
+          <button id="save-image">Save image</button>
+        </figure>
+      </div>
+    </main>
+  </body>
+  <script type="module" src="/main/setup.mjs"></script>
+</html>

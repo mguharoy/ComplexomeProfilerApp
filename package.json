@@ -1,0 +1,24 @@
+{
+  "name": "complexome-profiler",
+  "version": "1.0.0",
+  "description": "An application to discover insights from proteomics data by integrating with the complexome from multiple species.",
+  "homepage": "https://github.com/mguharoy/Complexome#readme",
+  "bugs": {
+    "url": "https://github.com/mguharoy/Complexome/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mguharoy/Complexome.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "",
+  "type": "module",
+  "main": "src/setup.mjs",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3"
+  },
+  "module": "src/setup.mjs"
+}

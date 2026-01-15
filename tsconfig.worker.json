@@ -1,0 +1,18 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"lib": [
+			"esnext",
+			"webworker"
+		]
+	},
+	"include": [
+		"src/cache.mjs",
+		"src/worker/**/*.mjs",
+		"src/shared/**/*.mjs",
+		"src/worker-decls.d.ts"
+	],
+	"exclude": [
+		"src/main/**/*.mjs"
+	]
+}
