@@ -12,6 +12,8 @@ import sys
 import textwrap
 import time
 import typing
+import random
+import numpy as np
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -32,6 +34,7 @@ ONLY_REGULATED_SUBUNITS = True
 UNIPROT_ID_COLUMN = 0
 LOG2FC_COLUMN = 1
 ADJPVAL_COLUMN = 2
+N_RANDOM = 1000
 
 ComplexT = dict[str, list[str]]
 FileName = str
@@ -71,6 +74,7 @@ class PerturbationScore:
     perturbation: Perturbation
     score: float
     score_normalized: float
+    significance: float
 
 
 @dataclass(frozen=True)
@@ -94,6 +98,7 @@ class OutputTableRow:
     perturbationType: str
     perturbationScore: float
     perturbationScoreNormalized: float
+    perturbationScoreSignificance: float
     subunit: str
     genename: str
     log2fc: float
@@ -768,6 +773,34 @@ def regulation(log2fc: list[float]) -> Perturbation:
     )
 
 
+def compute_regulation_score_pvalue(real_score, omics_data, complex_subunits):
+    random_scores = []
+    for i in range(N_RANDOM):
+        # shuffle dictionary containing omics data to generation random distribution of log2FC, pvalues for the proteins/genes present in the measured omics dataset.
+        values = list(omics_data.values())
+        shuffled_dict = dict(zip(omics_data.keys(), random.sample(values, len(values))))
+        random_log2_fc_values = []
+        random_adjp_values = []
+        for subunit in complex_subunits:
+            random_log2_fc_values.append(shuffled_dict[subunit][0])
+            random_adjp_values.append(shuffled_dict[subunit][1])
+        random_score = compute_regulation_score(random_log2_fc_values, random_adjp_values)
+        random_scores.append(random_score)
+
+    background_scores = np.array(random_scores)
+    z_score = (real_score - np.mean(background_scores) / np.std(background_scores))
+    return z_score
+
+
+def compute_regulation_score(log2FCs: list[float], adjPvals: list[float]) -> float:
+    regulation_score = sum(
+        [
+            abs(fc * -math.log10(pval))
+            for fc, pval in zip(log2FCs, adjPvals, strict=False)
+        ],
+    )
+    return regulation_score
+
 def perturbation_scores(
     complexome: Complexome,
     all_perturbed_complexes: list[SubunitInfo],
@@ -781,6 +814,7 @@ def perturbation_scores(
 
         log2_fc_values = []
         adjp_values = []
+        subunit_ids = []
         for subunit in cmplx:
             if "CPX-" in subunit or "URS" in subunit or "CHEBI:" in subunit:
                 continue
@@ -794,21 +828,28 @@ def perturbation_scores(
             if subunit_protein_id in complexome.proteomics_data:
                 log2_fc_values.append(complexome.proteomics_data[subunit_protein_id][0])
                 adjp_values.append(complexome.proteomics_data[subunit_protein_id][1])
+                subunit_ids.append(subunit_protein_id)
 
         perturbation = regulation(log2_fc_values)
 
+        """
         regulation_score = sum(
             [
                 abs(fc * -math.log10(pval))
                 for fc, pval in zip(log2_fc_values, adjp_values, strict=False)
             ],
         )
+        """
+        regulation_score = compute_regulation_score(log2_fc_values, adjp_values)
         regulation_score_normalized = regulation_score / float(len(log2_fc_values))
+
+        regulation_score_pvalue = compute_regulation_score_pvalue(regulation_score, complexome.proteomics_data, subunit_ids)
 
         perturbation_scores[complex_id] = PerturbationScore(
             perturbation=perturbation,
             score=regulation_score,
             score_normalized=regulation_score_normalized,
+            significance=regulation_score_pvalue
         )
     return perturbation_scores
 
@@ -833,6 +874,7 @@ def format_output_table_data(
                 perturbationType=perturbation.get(info.complex_id).perturbation,
                 perturbationScore=perturbation.get(info.complex_id).score,
                 perturbationScoreNormalized=perturbation.get(info.complex_id).score_normalized,
+                perturbationScoreSignificance=perturbation.get(info.complex_id).significance,
                 subunit=info.subunit,
                 genename=genes.get(info.subunit) or "",
                 log2fc=info.log2fc,
@@ -851,6 +893,7 @@ def format_output_table_data(
             "Perturbation Type",
             "Perturbation Score",
             "Normalized Score",
+            "Significance",
             "Num DE subunits",
             "Subunit Id",
             "Gene Name",
@@ -865,6 +908,7 @@ def format_output_table_data(
             info.perturbationType,
             f"{info.perturbationScore:.2f}",
             f"{info.perturbationScoreNormalized:.2f}",
+            f"{info.perturbationScoreSignificance:.2f}",
             f"{count_de_subunits[info.complex_id]}",
             info.subunit,
             info.genename,
