@@ -23,6 +23,7 @@ from urllib.error import URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+import line_profiler
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2  # type: ignore[import-untyped]
 
@@ -773,6 +774,7 @@ def regulation(log2fc: list[float]) -> Perturbation:
     )
 
 
+@line_profiler.profile
 def compute_regulation_score_pvalue(real_score, omics_data, complex_subunits):
     random_scores = []
     for i in range(N_RANDOM):
@@ -791,7 +793,7 @@ def compute_regulation_score_pvalue(real_score, omics_data, complex_subunits):
     z_score = (real_score - np.mean(background_scores) / np.std(background_scores))
     return z_score
 
-
+@line_profiler.profile
 def compute_regulation_score(log2FCs: list[float], adjPvals: list[float]) -> float:
     regulation_score = sum(
         [
@@ -831,15 +833,6 @@ def perturbation_scores(
                 subunit_ids.append(subunit_protein_id)
 
         perturbation = regulation(log2_fc_values)
-
-        """
-        regulation_score = sum(
-            [
-                abs(fc * -math.log10(pval))
-                for fc, pval in zip(log2_fc_values, adjp_values, strict=False)
-            ],
-        )
-        """
         regulation_score = compute_regulation_score(log2_fc_values, adjp_values)
         regulation_score_normalized = regulation_score / float(len(log2_fc_values))
 
